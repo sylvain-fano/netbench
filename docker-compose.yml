@@ -1,0 +1,72 @@
+services:
+
+  # iperf3-server:
+  #   image: networkstatic/iperf3
+  #   container_name: server
+  #   command: -s
+  #   ports:
+  #     - 5201:5201
+
+  # iperf3-client:
+  #   container_name: client
+  #   build:
+  #     context: src/iperf3      
+  #   environment:
+  #     - "IPERF3_DURATION=10" # Duration of the iperf3 test in seconds
+  #     - "IPERF3_INTERVAL=1" # Interval for printing output in seconds
+  #     - "IPERF3_ADDITIONAL_PARAMS=-4 -R -P4"
+  #     - "IPERF3_SERVER=iperf3-server"
+  #     # - IPERF3_SERVER=iperf3.moji.fr
+  #   depends_on:
+  #     - fluent-bit
+  #     - iperf3-server
+  #   logging:
+  #     driver: fluentd
+  #     options:
+  #       tag: docker-iperf3-client
+        
+  curl:
+    container_name: curl
+    env_file:
+      - .env
+    build:
+      context: src/curl
+      args:
+        TARGET: ${TARGET}
+        CERT: ${CERT}
+        KEY: ${KEY}
+        USERNAME: ${USERNAME}
+        TOKEN: ${TOKEN}
+        FILE: ${FILE}    
+    volumes:
+      - ~/.ssh/swf/swf.crt:/swf.crt:ro
+      - ~/.ssh/swf/swf.key:/swf.key:ro
+    command: "${TARGET} ${CERT} ${KEY} ${USERNAME} ${TOKEN}"
+    # depends_on:
+      # - fluent-bit      
+    # logging:
+    #   driver: fluentd
+    #   options:
+    #     tag: docker-curl-client
+  
+  # fluent-bit:
+  #   container_name: fluent-bit
+  #   image: fluent/fluent-bit:1.9.0
+  #   ports:
+  #     - "24224:24224"
+  #     - "24224:24224/udp"
+  #   volumes:
+  #     - ./conf/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
+  #   depends_on:
+  #     - elasticsearch
+
+  # elasticsearch:
+  #   container_name: elasticsearch
+  #   image: docker.elastic.co/elasticsearch/elasticsearch:7.15.0
+  #   ports:
+  #     - "9200:9200"
+  #     - "9300:9300"
+  #   environment:
+  #     - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+  #     - discovery.type=single-node
+
