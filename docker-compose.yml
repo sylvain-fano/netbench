@@ -1,5 +1,36 @@
 services:
 
+  curl:
+    container_name: curl
+    env_file:
+      - .env
+    build:
+      context: src/curl
+      args:
+        SHORT_ID: ${SHORT_ID}
+        LOCATION: ${LOCATION}
+        OS: ${OS}
+        HARDWARE: ${HARDWARE}
+        SWF_CERT: ${SWF_CERT}
+        SWF_KEY: ${SWF_KEY}
+        ARTIFACTORY_REPO: ${ARTIFACTORY_REPO}
+        ARTIFACTORY_USERNAME: ${ARTIFACTORY_USERNAME}
+        ARTIFACTORY_TOKEN: ${ARTIFACTORY_TOKEN}
+        AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+        AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+    volumes:
+      - ~/.ssh/swf/swf.crt:/swf.crt:ro
+      - ~/.ssh/swf/swf.key:/swf.key:ro
+    command: "${ARTIFACTORY_REPO} ${ARTIFACTORY_USERNAME} ${ARTIFACTORY_TOKEN} ${SHORT_ID} ${LOCATION} ${OS} ${HARDWARE} ${SWF_CERT} ${SWF_KEY}"
+    # depends_on:
+    #   - fluent-bit      
+    # logging:
+    #   driver: "fluentd"      
+    #   options:
+    #     fluentd-address: localhost:24224
+    #     fluentd-async: "true"
+    #     tag: curl-${SHORT_ID}
+
   # iperf3-server:
   #   image: networkstatic/iperf3
   #   container_name: server
@@ -25,48 +56,14 @@ services:
   #     options:
   #       tag: docker-iperf3-client
         
-  curl:
-    container_name: curl
-    env_file:
-      - .env
-    build:
-      context: src/curl
-      args:
-        TARGET: ${TARGET}
-        CERT: ${CERT}
-        KEY: ${KEY}
-        USERNAME: ${USERNAME}
-        TOKEN: ${TOKEN}
-        FILE: ${FILE}    
-    volumes:
-      - ~/.ssh/swf/swf.crt:/swf.crt:ro
-      - ~/.ssh/swf/swf.key:/swf.key:ro
-    command: "${TARGET} ${CERT} ${KEY} ${USERNAME} ${TOKEN}"
-    # depends_on:
-      # - fluent-bit      
-    # logging:
-    #   driver: fluentd
-    #   options:
-    #     tag: docker-curl-client
-  
   # fluent-bit:
   #   container_name: fluent-bit
-  #   image: fluent/fluent-bit:1.9.0
-  #   ports:
-  #     - "24224:24224"
-  #     - "24224:24224/udp"
+  #   env_file:
+  #     - .env
+  #   image: amazon/aws-for-fluent-bit:stable
+  #   # ports:
+  #   #   - "24224:24224"
+  #   #   - "24224:24224/udp"
   #   volumes:
   #     - ./conf/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
-  #   depends_on:
-  #     - elasticsearch
-
-  # elasticsearch:
-  #   container_name: elasticsearch
-  #   image: docker.elastic.co/elasticsearch/elasticsearch:7.15.0
-  #   ports:
-  #     - "9200:9200"
-  #     - "9300:9300"
-  #   environment:
-  #     - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-  #     - discovery.type=single-node
-
+  
