@@ -1,12 +1,17 @@
-# Use a base image
-FROM alpine:latest
+# Use AWS CLI official Docker image
+FROM amazon/aws-cli:latest
 
-# Install tools
-RUN apk --no-cache add curl
+# Install curl and jq
+RUN yum update -y && \
+    yum install -y curl jq && \
+    yum clean all
 
-COPY conf /conf
-COPY curl.sh /
+# Set work directory
+WORKDIR /aws
 
-RUN chmod +x /curl.sh
+COPY conf /aws/conf
+COPY curl.sh .
 
-ENTRYPOINT [ "/curl.sh" ]
+RUN chmod +x curl.sh
+
+ENTRYPOINT [ "/aws/curl.sh" ]
