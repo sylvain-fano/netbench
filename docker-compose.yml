@@ -1,16 +1,14 @@
 services:
 
-  curl:
-    container_name: curl
+  netbench:
+    container_name: netbench
     env_file:
       - .env
     build:
-      context: src/curl
+      context: src/netbench
       args:
         SHORT_ID: ${SHORT_ID}
         LOCATION: ${LOCATION}
-        OS: ${OS}
-        HARDWARE: ${HARDWARE}
         SWF_CERT: ${SWF_CERT}
         SWF_KEY: ${SWF_KEY}
         ARTIFACTORY_REPO: ${ARTIFACTORY_REPO}
@@ -21,7 +19,7 @@ services:
     volumes:
       - ~/.ssh/swf/swf.crt:/swf.crt:ro
       - ~/.ssh/swf/swf.key:/swf.key:ro
-    command: "${ARTIFACTORY_REPO} ${ARTIFACTORY_USERNAME} ${ARTIFACTORY_TOKEN} ${SHORT_ID} ${LOCATION} ${OS} ${HARDWARE} ${SWF_CERT} ${SWF_KEY}"
+    command: "${ARTIFACTORY_REPO} ${ARTIFACTORY_USERNAME} ${ARTIFACTORY_TOKEN} ${SHORT_ID} ${LOCATION} ${SWF_CERT} ${SWF_KEY}"
     # depends_on:
     #   - fluent-bit      
     # logging:
@@ -29,7 +27,7 @@ services:
     #   options:
     #     fluentd-address: localhost:24224
     #     fluentd-async: "true"
-    #     tag: curl-${SHORT_ID}
+    #     tag: netbench-${SHORT_ID}
 
   # iperf3-server:
   #   image: networkstatic/iperf3
