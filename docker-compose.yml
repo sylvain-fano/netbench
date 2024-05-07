@@ -4,6 +4,7 @@ services:
     container_name: netbench
     env_file:
       - .env
+    hostname: netbench.docker
     build:
       context: src/netbench
       args:
