@@ -1,7 +1,7 @@
 services:
 
-  netbench:
-    container_name: netbench
+  netbench-internet:
+    container_name: netbench-internet
     env_file:
       - .env
     hostname: netbench.docker

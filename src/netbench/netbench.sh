@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 ARTIFACTORY_REPO=$1
 ARTIFACTORY_USERNAME=$2
@@ -21,6 +21,13 @@ FILENAME="$SHORT_ID-$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 10 | head 
 # Generate a 10MB file silently
 dd if=/dev/urandom of="/tmp/$FILENAME" bs=1M count=10 status=none
 
+# Check if the client CERT or KEY is empty
+if [ -z "$6" ] || [ -z "$7" ]; then
+  CONTEXT=INTRANET
+else
+  CONTEXT=INTERNET
+fi
+
 # Check if log stream exists, if not, create it
 if ! aws logs describe-log-streams --region $AWS_REGION --log-group-name "$LOG_GROUP" --log-stream-name-prefix "$LOG_STREAM" --query 'logStreams[?logStreamName==`'$LOG_STREAM'`]' --output text | grep -q "$LOG_STREAM"; then
   aws logs create-log-stream --region $AWS_REGION --log-group-name "$LOG_GROUP" --log-stream-name "$LOG_STREAM"
@@ -33,15 +40,29 @@ do
 
 ##################################################################################  
 
-  curl_upload=$(echo "{ \
-    \"loop\": $i, \
-    \"test\": \"curl\", \
-    \"direction\": \"upload\", \
-    \"datetime\": \"$(date --utc '+%Y-%m-%d %H:%M:%S')\", \
-    \"location\": \"$LOCATION\", \
-    \"os\": \"$OS\", \
-    \"hostname\": \"$HOSTNAME\", \
-    $(curl -w @conf/curl-upload.conf --cert $SWF_CERT --key $SWF_KEY --user $ARTIFACTORY_USERNAME:$ARTIFACTORY_TOKEN -X PUT -T /tmp/$FILENAME $ARTIFACTORY_REPO/$FILENAME -o /dev/null --silent --no-buffer)}" | jq tostring)
+  if [[ "$CONTEXT" == "INTERNET" ]]; then
+    curl_upload=$(echo "{ \
+      \"loop\": $i, \
+      \"test\": \"curl\", \
+      \"direction\": \"upload\", \
+      \"datetime\": \"$(date --utc '+%Y-%m-%d %H:%M:%S')\", \
+      \"location\": \"$LOCATION\", \
+      \"os\": \"$OS\", \
+      \"hostname\": \"$HOSTNAME\", \
+      \"context\": \"$CONTEXT\", \
+      $(curl -w @conf/curl-upload.conf --cert $SWF_CERT --key $SWF_KEY --user $ARTIFACTORY_USERNAME:$ARTIFACTORY_TOKEN -X PUT -T /tmp/$FILENAME $ARTIFACTORY_REPO/$FILENAME -o /dev/null --silent --no-buffer)}" | jq tostring)
+  else
+    curl_upload=$(echo "{ \
+      \"loop\": $i, \
+      \"test\": \"curl\", \
+      \"direction\": \"upload\", \
+      \"datetime\": \"$(date --utc '+%Y-%m-%d %H:%M:%S')\", \
+      \"location\": \"$LOCATION\", \
+      \"os\": \"$OS\", \
+      \"hostname\": \"$HOSTNAME\", \
+      \"context\": \"$CONTEXT\", \
+      $(curl -w @conf/curl-upload.conf --user $ARTIFACTORY_USERNAME:$ARTIFACTORY_TOKEN -X PUT -T /tmp/$FILENAME $ARTIFACTORY_REPO/$FILENAME -o /dev/null --silent --no-buffer)}" | jq tostring)
+  fi
   echo $curl_upload | jq .
   SEQ=$(aws logs put-log-events \
     --region $AWS_REGION \
@@ -54,15 +75,29 @@ do
 
 ##################################################################################  
 
- curl_download=$(echo "{ \
-    \"loop\": $i, \
-    \"test\": \"curl\", \
-    \"direction\": \"download\", \
-    \"datetime\": \"$(date --utc '+%Y-%m-%d %H:%M:%S')\", \
-    \"location\": \"$LOCATION\", \
-    \"os\": \"$OS\", \
-    \"hostname\": \"$HOSTNAME\", \
-    $(curl -w @conf/curl-download.conf --cert $SWF_CERT --key $SWF_KEY --user $ARTIFACTORY_USERNAME:$ARTIFACTORY_TOKEN $ARTIFACTORY_REPO/$FILENAME -o /dev/null --silent --no-buffer)}" | jq tostring)
+  if [[ "$CONTEXT" == "INTERNET" ]]; then
+    curl_download=$(echo "{ \
+      \"loop\": $i, \
+      \"test\": \"curl\", \
+      \"direction\": \"download\", \
+      \"datetime\": \"$(date --utc '+%Y-%m-%d %H:%M:%S')\", \
+      \"location\": \"$LOCATION\", \
+      \"os\": \"$OS\", \
+      \"hostname\": \"$HOSTNAME\", \
+      \"context\": \"$CONTEXT\", \
+      $(curl -w @conf/curl-download.conf --cert $SWF_CERT --key $SWF_KEY --user $ARTIFACTORY_USERNAME:$ARTIFACTORY_TOKEN $ARTIFACTORY_REPO/$FILENAME -o /dev/null --silent --no-buffer)}" | jq tostring)
+  else
+     curl_download=$(echo "{ \
+      \"loop\": $i, \
+      \"test\": \"curl\", \
+      \"direction\": \"download\", \
+      \"datetime\": \"$(date --utc '+%Y-%m-%d %H:%M:%S')\", \
+      \"location\": \"$LOCATION\", \
+      \"os\": \"$OS\", \
+      \"hostname\": \"$HOSTNAME\", \
+      \"context\": \"$CONTEXT\", \
+      $(curl -w @conf/curl-download.conf --user $ARTIFACTORY_USERNAME:$ARTIFACTORY_TOKEN $ARTIFACTORY_REPO/$FILENAME -o /dev/null --silent --no-buffer)}" | jq tostring)
+  fi
   echo $curl_download | jq .
   SEQ=$(aws logs put-log-events \
     --region $AWS_REGION \
@@ -82,7 +117,8 @@ do
       {\"datetime\": \"$(date --utc '+%Y-%m-%d %H:%M:%S')\"} + \
       {\"location\": \"$LOCATION\"} + \
       {\"os\": \"$OS\"} + \
-      {\"hostname\": \"$hostname\"} + \
+      {\"hostname\": \"$HOSTNAME\"} + \
+      {\"context\": \"$CONTEXT\"} + \
       . " \
     | jq tostring)
   echo $iperf_upload | jq .
@@ -104,7 +140,8 @@ do
       {\"datetime\": \"$(date --utc '+%Y-%m-%d %H:%M:%S')\"} + \
       {\"location\": \"$LOCATION\"} + \
       {\"os\": \"$OS\"} + \
-      {\"hostname\": \"$hostname\"} + \
+      {\"hostname\": \"$HOSTNAME\"} + \
+      {\"context\": \"$CONTEXT\"} + \
       . " \
     | jq tostring)
   echo $iperf_download | jq .
