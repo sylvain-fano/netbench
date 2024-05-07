@@ -10,8 +10,6 @@ services:
       args:
         SHORT_ID: ${SHORT_ID}
         LOCATION: ${LOCATION}
-        SWF_CERT: ${SWF_CERT}
-        SWF_KEY: ${SWF_KEY}
         ARTIFACTORY_REPO: ${ARTIFACTORY_REPO}
         ARTIFACTORY_USERNAME: ${ARTIFACTORY_USERNAME}
         ARTIFACTORY_TOKEN: ${ARTIFACTORY_TOKEN}
@@ -20,49 +18,5 @@ services:
     volumes:
       - ~/.ssh/swf/swf.crt:/swf.crt:ro
       - ~/.ssh/swf/swf.key:/swf.key:ro
-    command: "${ARTIFACTORY_REPO} ${ARTIFACTORY_USERNAME} ${ARTIFACTORY_TOKEN} ${SHORT_ID} ${LOCATION} ${SWF_CERT} ${SWF_KEY}"
-    # depends_on:
-    #   - fluent-bit      
-    # logging:
-    #   driver: "fluentd"      
-    #   options:
-    #     fluentd-address: localhost:24224
-    #     fluentd-async: "true"
-    #     tag: netbench-${SHORT_ID}
-
-  # iperf3-server:
-  #   image: networkstatic/iperf3
-  #   container_name: server
-  #   command: -s
-  #   ports:
-  #     - 5201:5201
-
-  # iperf3-client:
-  #   container_name: client
-  #   build:
-  #     context: src/iperf3      
-  #   environment:
-  #     - "IPERF3_DURATION=10" # Duration of the iperf3 test in seconds
-  #     - "IPERF3_INTERVAL=1" # Interval for printing output in seconds
-  #     - "IPERF3_ADDITIONAL_PARAMS=-4 -R -P4"
-  #     - "IPERF3_SERVER=iperf3-server"
-  #     # - IPERF3_SERVER=iperf3.moji.fr
-  #   depends_on:
-  #     - fluent-bit
-  #     - iperf3-server
-  #   logging:
-  #     driver: fluentd
-  #     options:
-  #       tag: docker-iperf3-client
-        
-  # fluent-bit:
-  #   container_name: fluent-bit
-  #   env_file:
-  #     - .env
-  #   image: amazon/aws-for-fluent-bit:stable
-  #   # ports:
-  #   #   - "24224:24224"
-  #   #   - "24224:24224/udp"
-  #   volumes:
-  #     - ./conf/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
-  
+    command: "${ARTIFACTORY_REPO} ${ARTIFACTORY_USERNAME} ${ARTIFACTORY_TOKEN} ${SHORT_ID} ${LOCATION} /swf.crt /swf.key"
+    
