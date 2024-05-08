@@ -41,12 +41,20 @@ git clone https://github.com/sylvain-fano/netbench.git && cd netbench
     ```
 - - Run
     ```bash
-    docker-compose -fdocker-compose-internet.yml up -d 
+    docker-compose -f docker-compose-internet.yml up -d 
     ```
 
 - **Option 2** : Run the test against  the SWF **intranet** entrypoint
 - - Run
 
     ```bash
-    docker-compose -fdocker-compose-intranet.yml up -d 
+    docker-compose -f docker-compose-intranet.yml up -d 
+    ```
+
+## Terminate the test
+
+- Run
+
+    ```bash
+    docker-compose -f docker-compose-intranet.yml stop
     ```
