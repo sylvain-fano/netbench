@@ -24,8 +24,10 @@ dd if=/dev/urandom of="/tmp/$FILENAME" bs=1M count=10 status=none
 # Check if the client CERT or KEY is empty
 if [ -z "$6" ] || [ -z "$7" ]; then
   CONTEXT=INTRANET
+  IPERF_SERVER="-c 53.13.80.189 -p 443"
 else
   CONTEXT=INTERNET
+  IPERF_SERVER="$IPERF_SERVER"
 fi
 
 # Check if log stream exists, if not, create it
@@ -109,7 +111,7 @@ do
 
   ##################################################################################
  
-  iperf_upload=$(iperf3 -c speedtest.wtnet.de -p 5200 -4 --json -t 10 | \
+  iperf_upload=$(iperf3 $IPERF_SERVER -4 --json -t 10 | \
     jq " \
       {\"loop\": $i} + \
       {\"test\": \"iperf3\"} + \
@@ -132,7 +134,7 @@ do
 
    ##################################################################################
 
-  iperf_download=$(iperf3 -c speedtest.wtnet.de -p 5200 -4 --json -t 10 -R | \
+  iperf_download=$(iperf3 $IPERF_SERVER -4 --json -t 10 -R | \
     jq " \
       {\"loop\": $i} + \
       {\"test\": \"iperf3\"} + \
