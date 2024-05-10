@@ -19,7 +19,7 @@ LOG_STREAM="$SHORT_ID"
 FILENAME="$SHORT_ID-$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 10 | head -n 1)"
 
 # Generate a 10MB file silently
-dd if=/dev/urandom of="/tmp/$FILENAME" bs=1M count=10 status=none
+dd if=/dev/urandom of="/tmp/$FILENAME" bs=1M count=100 status=none
 
 # Check if the client CERT or KEY is empty
 if [ -z "$6" ] || [ -z "$7" ]; then
@@ -159,5 +159,5 @@ do
   
 
   i=$(($i+1))
-  sleep 10
+  sleep 600
 done
