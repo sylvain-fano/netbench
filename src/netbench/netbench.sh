@@ -27,7 +27,7 @@ if [ -z "$6" ] || [ -z "$7" ]; then
   IPERF_SERVER="-c 53.13.80.189 -p 443"
 else
   CONTEXT=INTERNET
-  IPERF_SERVER="$IPERF_SERVER"
+  IPERF_SERVER="-c speedtest.wtnet.de -p 5200"
 fi
 
 # Check if log stream exists, if not, create it

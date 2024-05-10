@@ -58,3 +58,29 @@ git clone https://github.com/sylvain-fano/netbench.git && cd netbench
     ```bash
     docker-compose -f docker-compose-intranet.yml stop
     ```
+
+    or
+    ```bash
+    docker-compose -f docker-compose-internet.yml stop
+    ```
+
+## Update to the latest version 
+
+- Update the repo 
+
+    ```bash
+    git pull
+    ```
+
+- Rebuild & run
+
+    ```bash
+    docker-compose -f docker-compose-intranet.yml build && docker-compose -f docker-compose-intranet.yml restart
+    ```
+
+    or 
+
+    ```bash
+    docker-compose -f docker-compose-internet.yml build && docker-compose -f docker-compose-internet.yml restart
+    ```
+
