@@ -23,7 +23,7 @@ The easiest way to have **docker** & **docker-compose** available on Windows is 
 - Clone the repository
 
 ```bash
-git clone https://github.com/sylvain-fano/netbench.git && cd netbench
+git clone ssh://git@git.swf.daimler.com:7999/swfinternal/terraform/cloud-infra/netbench.git && cd netbench
 ```
 
 - Duplicate the `.env.origin` file to `.env`
@@ -40,15 +40,16 @@ git clone https://github.com/sylvain-fano/netbench.git && cd netbench
     ...
     ```
 - - Run
+
     ```bash
-    docker-compose -f docker-compose-internet.yml up -d 
+    docker-compose -f docker-compose-internet.yml up --build
     ```
 
 - **Option 2** : Run the test against  the SWF **intranet** entrypoint
 - - Run
 
     ```bash
-    docker-compose -f docker-compose-intranet.yml up -d 
+    docker-compose -f docker-compose-intranet.yml up --build
     ```
 
 ## Terminate the test
@@ -75,12 +76,11 @@ git clone https://github.com/sylvain-fano/netbench.git && cd netbench
 - Rebuild & run
 
     ```bash
-    docker-compose -f docker-compose-intranet.yml build && docker-compose -f docker-compose-intranet.yml restart
+    docker-compose -f docker-compose-intranet.yml up --build
     ```
 
     or 
 
     ```bash
-    docker-compose -f docker-compose-internet.yml build && docker-compose -f docker-compose-internet.yml restart
+    docker-compose -f docker-compose-internet.yml up --build
     ```
-

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+VERSION="0.1.0"
+
 ARTIFACTORY_REPO=$1
 ARTIFACTORY_USERNAME=$2
 ARTIFACTORY_TOKEN=$3
@@ -14,20 +16,19 @@ AWS_REGION="eu-central-1"
 LOG_GROUP="netbench"
 LOG_STREAM="$SHORT_ID"
 
-
-# Generate a random filename
-FILENAME="$SHORT_ID-$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 10 | head -n 1)"
-
-# Generate a 10MB file silently
+# FILENAME="$SHORT_ID-$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 10 | head -n 1)"
+FILENAME="$SHORT_ID"
 dd if=/dev/urandom of="/tmp/$FILENAME" bs=1M count=100 status=none
 
 # Check if the client CERT or KEY is empty
 if [ -z "$6" ] || [ -z "$7" ]; then
   CONTEXT=INTRANET
   IPERF_SERVER="-c 53.13.80.189 -p 443"
+  MTR_SERVER="artifact.swf.i.mercedes-benz.com -P 443"
 else
   CONTEXT=INTERNET
   IPERF_SERVER="-c speedtest.wtnet.de -p 5200"
+  MTR_SERVER="artifact.swf.i.mercedes-benz.com -P 443"
 fi
 
 # Check if log stream exists, if not, create it
@@ -41,9 +42,12 @@ while true
 do
 
 ##################################################################################  
+# CURL
+##################################################################################  
 
   if [[ "$CONTEXT" == "INTERNET" ]]; then
     curl_upload=$(echo "{ \
+      \"version\": \"$VERSION\", \
       \"loop\": $i, \
       \"test\": \"curl\", \
       \"direction\": \"upload\", \
@@ -55,6 +59,7 @@ do
       $(curl -w @conf/curl-upload.conf --cert $SWF_CERT --key $SWF_KEY --user $ARTIFACTORY_USERNAME:$ARTIFACTORY_TOKEN -X PUT -T /tmp/$FILENAME $ARTIFACTORY_REPO/$FILENAME -o /dev/null --silent --no-buffer)}" | jq tostring)
   else
     curl_upload=$(echo "{ \
+      \"version\": \"$VERSION\", \
       \"loop\": $i, \
       \"test\": \"curl\", \
       \"direction\": \"upload\", \
@@ -74,11 +79,9 @@ do
     $SEQUENCE | jq .nextSequenceToken --raw-output)
   SEQUENCE=" --sequence-token $SEQ"
 
-
-##################################################################################  
-
   if [[ "$CONTEXT" == "INTERNET" ]]; then
     curl_download=$(echo "{ \
+      \"version\": \"$VERSION\", \
       \"loop\": $i, \
       \"test\": \"curl\", \
       \"direction\": \"download\", \
@@ -90,6 +93,7 @@ do
       $(curl -w @conf/curl-download.conf --cert $SWF_CERT --key $SWF_KEY --user $ARTIFACTORY_USERNAME:$ARTIFACTORY_TOKEN $ARTIFACTORY_REPO/$FILENAME -o /dev/null --silent --no-buffer)}" | jq tostring)
   else
      curl_download=$(echo "{ \
+      \"version\": \"$VERSION\", \
       \"loop\": $i, \
       \"test\": \"curl\", \
       \"direction\": \"download\", \
@@ -110,11 +114,37 @@ do
   SEQUENCE=" --sequence-token $SEQ"
 
   ##################################################################################
- 
+  # MTR 
+  ##################################################################################
+  mtr=$(mtr $MTR_SERVER -w -T -j | \
+    jq " \
+      {\"version\": \"$VERSION\"} + \
+      {\"loop\": $i} + \
+      {\"test\": \"mtr\"} + \
+      {\"datetime\": \"$(date --utc '+%Y-%m-%d %H:%M:%S')\"} + \
+      {\"location\": \"$LOCATION\"} + \
+      {\"os\": \"$OS\"} + \
+      {\"hostname\": \"$HOSTNAME\"} + \
+      {\"context\": \"$CONTEXT\"} + \
+      . " \
+    | jq tostring)
+  echo $mtr | jq .
+  SEQ=$(aws logs put-log-events \
+    --region $AWS_REGION \
+    --log-group-name $LOG_GROUP \
+    --log-stream-name $LOG_STREAM \
+    --log-events "{\"timestamp\":$(date +%s000),\"message\":$mtr}" \
+    $SEQUENCE | jq .nextSequenceToken --raw-output)
+  SEQUENCE=" --sequence-token $SEQ"
+
+  ################################################################################## 
+  # IPERF
+  ################################################################################## 
   iperf_upload=$(iperf3 $IPERF_SERVER -4 --json -t 10 | \
     jq " \
+      {\"version\": \"$VERSION\"} + \
       {\"loop\": $i} + \
-      {\"test\": \"iperf3\"} + \
+      {\"test\": \"iperf3-tcp\"} + \
       {\"direction\": \"upload\"} + \
       {\"datetime\": \"$(date --utc '+%Y-%m-%d %H:%M:%S')\"} + \
       {\"location\": \"$LOCATION\"} + \
@@ -132,12 +162,11 @@ do
     $SEQUENCE | jq .nextSequenceToken --raw-output)
   SEQUENCE=" --sequence-token $SEQ"
 
-   ##################################################################################
-
   iperf_download=$(iperf3 $IPERF_SERVER -4 --json -t 10 -R | \
     jq " \
+      {\"version\": \"$VERSION\"} + \
       {\"loop\": $i} + \
-      {\"test\": \"iperf3\"} + \
+      {\"test\": \"iperf3-tcp\"} + \
       {\"direction\": \"download\"} + \
       {\"datetime\": \"$(date --utc '+%Y-%m-%d %H:%M:%S')\"} + \
       {\"location\": \"$LOCATION\"} + \
@@ -155,8 +184,50 @@ do
     $SEQUENCE | jq .nextSequenceToken --raw-output)
   SEQUENCE=" --sequence-token $SEQ"
 
-  ##################################################################################
+  iperf_upload_udp=$(iperf3 $IPERF_SERVER -4 --json -t 10 -u | \
+    jq " \
+      {\"version\": \"$VERSION\"} + \
+      {\"loop\": $i} + \
+      {\"test\": \"iperf3-udp\"} + \
+      {\"direction\": \"upload\"} + \
+      {\"datetime\": \"$(date --utc '+%Y-%m-%d %H:%M:%S')\"} + \
+      {\"location\": \"$LOCATION\"} + \
+      {\"os\": \"$OS\"} + \
+      {\"hostname\": \"$HOSTNAME\"} + \
+      {\"context\": \"$CONTEXT\"} + \
+      . " \
+    | jq tostring)
+  echo $iperf_upload_udp | jq .
+  SEQ=$(aws logs put-log-events \
+    --region $AWS_REGION \
+    --log-group-name $LOG_GROUP \
+    --log-stream-name $LOG_STREAM \
+    --log-events "{\"timestamp\":$(date +%s000),\"message\":$iperf_upload_udp}" \
+    $SEQUENCE | jq .nextSequenceToken --raw-output)
+  SEQUENCE=" --sequence-token $SEQ"
   
+  iperf_download_udp=$(iperf3 $IPERF_SERVER -4 --json -t 10 -u -R | \
+    jq " \
+      {\"version\": \"$VERSION\"} + \
+      {\"loop\": $i} + \
+      {\"test\": \"iperf3-udp\"} + \
+      {\"direction\": \"download\"} + \
+      {\"datetime\": \"$(date --utc '+%Y-%m-%d %H:%M:%S')\"} + \
+      {\"location\": \"$LOCATION\"} + \
+      {\"os\": \"$OS\"} + \
+      {\"hostname\": \"$HOSTNAME\"} + \
+      {\"context\": \"$CONTEXT\"} + \
+      . " \
+    | jq tostring)
+  echo $iperf_download_udp | jq .
+  SEQ=$(aws logs put-log-events \
+    --region $AWS_REGION \
+    --log-group-name $LOG_GROUP \
+    --log-stream-name $LOG_STREAM \
+    --log-events "{\"timestamp\":$(date +%s000),\"message\":$iperf_download_udp}" \
+    $SEQUENCE | jq .nextSequenceToken --raw-output)
+  SEQUENCE=" --sequence-token $SEQ"
+
 
   i=$(($i+1))
   sleep 600
