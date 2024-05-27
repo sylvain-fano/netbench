@@ -1,0 +1,3 @@
+export $(cat .env)
+cd src/netbench
+./netbench.sh $ARTIFACTORY_REPO $ARTIFACTORY_USERNAME $ARTIFACTORY_TOKEN $SHORT_ID $LOCATION $1 $2

@@ -76,11 +76,46 @@ git clone ssh://git@git.swf.daimler.com:7999/swfinternal/terraform/cloud-infra/n
 - Rebuild & run
 
     ```bash
-    docker-compose -f docker-compose-intranet.yml up --build
+    docker-compose -f docker-compose-intranet.yml up --build --force-recreate
     ```
 
     or 
 
     ```bash
-    docker-compose -f docker-compose-internet.yml up --build
+    docker-compose -f docker-compose-internet.yml up --build --force-recreate
+    ```
+
+## Alternative Usage without Docker
+
+If docker is not available on the machine, it is still possible to run the bash script manually. 
+
+> We do not support Windows for now, it's only working for Unix based OS (Linux, MacOS, Windows Subsystem for Linux, ...)
+
+> Since the script is using different tools, you need to be able to install these tools for the script to run properly. 
+
+### Prerequisites
+
+Please be sure to have the following tools available :
+
+- iperf3
+- curl
+- jq
+- aws-cli
+- mtr
+
+### Usage
+
+- Duplicate the `.env.origin` file to `.env`
+- Edit `.env` with your personal informations received by email
+
+- From intranet, run 
+
+    ```bash
+    bash run-manually.sh 
+    ```
+
+    or from internet, run (replacing with the path to your client certificate)
+
+    ```bash
+    bash run-manually.sh <path/to/swf.crt> <path/to/swf.key> 
     ```
