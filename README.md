@@ -103,6 +103,10 @@ Please be sure to have the following tools available :
 - aws-cli
 - mtr
 
+```bash
+
+```
+
 ### Usage
 
 - Duplicate the `.env.origin` file to `.env`
