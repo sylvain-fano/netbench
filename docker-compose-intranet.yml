@@ -2,6 +2,7 @@ services:
 
   netbench-intranet:
     container_name: netbench-intranet
+    restart: on-failure
     env_file:
       - .env
     hostname: netbench.docker

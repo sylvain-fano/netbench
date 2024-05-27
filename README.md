@@ -23,7 +23,7 @@ The easiest way to have **docker** & **docker-compose** available on Windows is 
 - Clone the repository
 
 ```bash
-git clone ssh://git@git.swf.daimler.com:7999/swfinternal/terraform/cloud-infra/netbench.git && cd netbench
+git clone --depth 1 --branch main ssh://git@git.swf.daimler.com:7999/swfinternal/terraform/cloud-infra/netbench.git && cd netbench
 ```
 
 - Duplicate the `.env.origin` file to `.env`
@@ -70,7 +70,7 @@ git clone ssh://git@git.swf.daimler.com:7999/swfinternal/terraform/cloud-infra/n
 - Update the repo 
 
     ```bash
-    git pull
+    git pull --depth 1
     ```
 
 - Rebuild & run

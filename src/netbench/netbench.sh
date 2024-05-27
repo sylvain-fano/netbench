@@ -16,6 +16,8 @@ AWS_REGION="eu-central-1"
 LOG_GROUP="/swf/netbench"
 LOG_STREAM="$SHORT_ID"
 
+SLEEP=900 # runs every 15 minutes
+
 # FILENAME="$SHORT_ID-$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 10 | head -n 1)"
 FILENAME="$SHORT_ID"
 dd if=/dev/urandom of="/tmp/$FILENAME" bs=1M count=100 status=none
@@ -239,5 +241,5 @@ do
 
 
   i=$(($i+1))
-  sleep 600
+  sleep $SLEEP
 done
