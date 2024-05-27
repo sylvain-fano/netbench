@@ -76,11 +76,11 @@ git clone ssh://git@git.swf.daimler.com:7999/swfinternal/terraform/cloud-infra/n
 - Rebuild & run
 
     ```bash
-    docker-compose -f docker-compose-intranet.yml up --build
+    docker-compose -f docker-compose-intranet.yml up --build --force-recreate
     ```
 
     or 
 
     ```bash
-    docker-compose -f docker-compose-internet.yml up --build
+    docker-compose -f docker-compose-internet.yml up --build --force-recreate
     ```

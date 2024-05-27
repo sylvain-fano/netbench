@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="0.1.0"
+VERSION="0.1.1"
 
 ARTIFACTORY_REPO=$1
 ARTIFACTORY_USERNAME=$2
@@ -13,7 +13,7 @@ SWF_CERT=$6
 SWF_KEY=$7
 
 AWS_REGION="eu-central-1"
-LOG_GROUP="netbench"
+LOG_GROUP="/swf/netbench"
 LOG_STREAM="$SHORT_ID"
 
 # FILENAME="$SHORT_ID-$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 10 | head -n 1)"
@@ -52,6 +52,7 @@ do
       \"test\": \"curl\", \
       \"direction\": \"upload\", \
       \"datetime\": \"$(date --utc '+%Y-%m-%d %H:%M:%S')\", \
+      \"id\": \"$SHORT_ID\", \
       \"location\": \"$LOCATION\", \
       \"os\": \"$OS\", \
       \"hostname\": \"$HOSTNAME\", \
@@ -64,6 +65,7 @@ do
       \"test\": \"curl\", \
       \"direction\": \"upload\", \
       \"datetime\": \"$(date --utc '+%Y-%m-%d %H:%M:%S')\", \
+      \"id\": \"$SHORT_ID\", \
       \"location\": \"$LOCATION\", \
       \"os\": \"$OS\", \
       \"hostname\": \"$HOSTNAME\", \
@@ -86,6 +88,7 @@ do
       \"test\": \"curl\", \
       \"direction\": \"download\", \
       \"datetime\": \"$(date --utc '+%Y-%m-%d %H:%M:%S')\", \
+      \"id\": \"$SHORT_ID\", \
       \"location\": \"$LOCATION\", \
       \"os\": \"$OS\", \
       \"hostname\": \"$HOSTNAME\", \
@@ -98,6 +101,7 @@ do
       \"test\": \"curl\", \
       \"direction\": \"download\", \
       \"datetime\": \"$(date --utc '+%Y-%m-%d %H:%M:%S')\", \
+      \"id\": \"$SHORT_ID\", \
       \"location\": \"$LOCATION\", \
       \"os\": \"$OS\", \
       \"hostname\": \"$HOSTNAME\", \
@@ -122,6 +126,7 @@ do
       {\"loop\": $i} + \
       {\"test\": \"mtr\"} + \
       {\"datetime\": \"$(date --utc '+%Y-%m-%d %H:%M:%S')\"} + \
+      {\"id\": \"$SHORT_ID\"} + \
       {\"location\": \"$LOCATION\"} + \
       {\"os\": \"$OS\"} + \
       {\"hostname\": \"$HOSTNAME\"} + \
@@ -147,6 +152,7 @@ do
       {\"test\": \"iperf3-tcp\"} + \
       {\"direction\": \"upload\"} + \
       {\"datetime\": \"$(date --utc '+%Y-%m-%d %H:%M:%S')\"} + \
+      {\"id\": \"$SHORT_ID\"} + \
       {\"location\": \"$LOCATION\"} + \
       {\"os\": \"$OS\"} + \
       {\"hostname\": \"$HOSTNAME\"} + \
@@ -169,6 +175,7 @@ do
       {\"test\": \"iperf3-tcp\"} + \
       {\"direction\": \"download\"} + \
       {\"datetime\": \"$(date --utc '+%Y-%m-%d %H:%M:%S')\"} + \
+      {\"id\": \"$SHORT_ID\"} + \
       {\"location\": \"$LOCATION\"} + \
       {\"os\": \"$OS\"} + \
       {\"hostname\": \"$HOSTNAME\"} + \
@@ -191,6 +198,7 @@ do
       {\"test\": \"iperf3-udp\"} + \
       {\"direction\": \"upload\"} + \
       {\"datetime\": \"$(date --utc '+%Y-%m-%d %H:%M:%S')\"} + \
+      {\"id\": \"$SHORT_ID\"} + \
       {\"location\": \"$LOCATION\"} + \
       {\"os\": \"$OS\"} + \
       {\"hostname\": \"$HOSTNAME\"} + \
@@ -213,6 +221,7 @@ do
       {\"test\": \"iperf3-udp\"} + \
       {\"direction\": \"download\"} + \
       {\"datetime\": \"$(date --utc '+%Y-%m-%d %H:%M:%S')\"} + \
+      {\"id\": \"$SHORT_ID\"} + \
       {\"location\": \"$LOCATION\"} + \
       {\"os\": \"$OS\"} + \
       {\"hostname\": \"$HOSTNAME\"} + \
