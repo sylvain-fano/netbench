@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="0.1.2"
+VERSION="0.1.3"
 
 ARTIFACTORY_REPO=$1
 ARTIFACTORY_USERNAME=$2
@@ -81,7 +81,11 @@ do
     --log-stream-name $LOG_STREAM \
     --log-events "{\"timestamp\":$(date +%s000),\"message\":$curl_upload}" \
     $SEQUENCE | jq .nextSequenceToken --raw-output)
-  SEQUENCE=" --sequence-token $SEQ"
+  if [[ -n "$SEQ" ]]; then
+    SEQUENCE=" --sequence-token $SEQ"
+  else
+    SEQUENCE=""
+  fi
 
   if [[ "$CONTEXT" == "INTERNET" ]]; then
     curl_download=$(echo "{ \
@@ -117,7 +121,11 @@ do
     --log-stream-name $LOG_STREAM \
     --log-events "{\"timestamp\":$(date +%s000),\"message\":$curl_download}" \
     $SEQUENCE | jq .nextSequenceToken --raw-output)
-  SEQUENCE=" --sequence-token $SEQ"
+  if [[ -n "$SEQ" ]]; then
+    SEQUENCE=" --sequence-token $SEQ"
+  else
+    SEQUENCE=""
+  fi
 
   ##################################################################################
   # MTR 
@@ -142,7 +150,11 @@ do
     --log-stream-name $LOG_STREAM \
     --log-events "{\"timestamp\":$(date +%s000),\"message\":$mtr}" \
     $SEQUENCE | jq .nextSequenceToken --raw-output)
-  SEQUENCE=" --sequence-token $SEQ"
+  if [[ -n "$SEQ" ]]; then
+    SEQUENCE=" --sequence-token $SEQ"
+  else
+    SEQUENCE=""
+  fi
 
   ################################################################################## 
   # IPERF
@@ -168,7 +180,11 @@ do
     --log-stream-name $LOG_STREAM \
     --log-events "{\"timestamp\":$(date +%s000),\"message\":$iperf_upload}" \
     $SEQUENCE | jq .nextSequenceToken --raw-output)
-  SEQUENCE=" --sequence-token $SEQ"
+  if [[ -n "$SEQ" ]]; then
+    SEQUENCE=" --sequence-token $SEQ"
+  else
+    SEQUENCE=""
+  fi
 
   iperf_download=$(iperf3 $IPERF_SERVER -4 --json -t 10 -R | \
     jq " \
@@ -191,7 +207,11 @@ do
     --log-stream-name $LOG_STREAM \
     --log-events "{\"timestamp\":$(date +%s000),\"message\":$iperf_download}" \
     $SEQUENCE | jq .nextSequenceToken --raw-output)
-  SEQUENCE=" --sequence-token $SEQ"
+  if [[ -n "$SEQ" ]]; then
+    SEQUENCE=" --sequence-token $SEQ"
+  else
+    SEQUENCE=""
+  fi
 
   iperf_upload_udp=$(iperf3 $IPERF_SERVER -4 --json -t 10 -u | \
     jq " \
@@ -214,7 +234,11 @@ do
     --log-stream-name $LOG_STREAM \
     --log-events "{\"timestamp\":$(date +%s000),\"message\":$iperf_upload_udp}" \
     $SEQUENCE | jq .nextSequenceToken --raw-output)
-  SEQUENCE=" --sequence-token $SEQ"
+  if [[ -n "$SEQ" ]]; then
+    SEQUENCE=" --sequence-token $SEQ"
+  else
+    SEQUENCE=""
+  fi
   
   iperf_download_udp=$(iperf3 $IPERF_SERVER -4 --json -t 10 -u -R | \
     jq " \
@@ -237,7 +261,11 @@ do
     --log-stream-name $LOG_STREAM \
     --log-events "{\"timestamp\":$(date +%s000),\"message\":$iperf_download_udp}" \
     $SEQUENCE | jq .nextSequenceToken --raw-output)
-  SEQUENCE=" --sequence-token $SEQ"
+  if [[ -n "$SEQ" ]]; then
+    SEQUENCE=" --sequence-token $SEQ"
+  else
+    SEQUENCE=""
+  fi
 
 
   i=$(($i+1))

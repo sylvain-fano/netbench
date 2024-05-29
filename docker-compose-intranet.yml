@@ -1,20 +1,30 @@
 services:
 
+  # netbench-intranet:
+  #   container_name: netbench-intranet
+  #   restart: on-failure
+  #   env_file:
+  #     - .env
+  #   hostname: netbench.docker
+  #   build:
+  #     context: src/netbench
+  #     args:
+  #       SHORT_ID: ${SHORT_ID}
+  #       LOCATION: ${LOCATION}
+  #       ARTIFACTORY_REPO: ${ARTIFACTORY_REPO}
+  #       ARTIFACTORY_USERNAME: ${ARTIFACTORY_USERNAME}
+  #       ARTIFACTORY_TOKEN: ${ARTIFACTORY_TOKEN}
+  #       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+  #       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}    
+  #   command: "${ARTIFACTORY_REPO} ${ARTIFACTORY_USERNAME} ${ARTIFACTORY_TOKEN} ${SHORT_ID} ${LOCATION}"
+
   netbench-intranet:
     container_name: netbench-intranet
     restart: on-failure
     env_file:
       - .env
     hostname: netbench.docker
-    build:
-      context: src/netbench
-      args:
-        SHORT_ID: ${SHORT_ID}
-        LOCATION: ${LOCATION}
-        ARTIFACTORY_REPO: ${ARTIFACTORY_REPO}
-        ARTIFACTORY_USERNAME: ${ARTIFACTORY_USERNAME}
-        ARTIFACTORY_TOKEN: ${ARTIFACTORY_TOKEN}
-        AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-        AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}    
+    image: sylvainfano/netbench:latest
     command: "${ARTIFACTORY_REPO} ${ARTIFACTORY_USERNAME} ${ARTIFACTORY_TOKEN} ${SHORT_ID} ${LOCATION}"
+    
     
