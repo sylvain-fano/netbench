@@ -1,21 +1,33 @@
 services:
 
+  # netbench-internet:
+  #   container_name: netbench-internet
+  #   restart: on-failure
+  #   env_file:
+  #     - .env
+  #   hostname: netbench.docker
+  #   build:
+  #     context: src/netbench
+  #     args:
+  #       SHORT_ID: ${SHORT_ID}
+  #       LOCATION: ${LOCATION}
+  #       ARTIFACTORY_REPO: ${ARTIFACTORY_REPO}
+  #       ARTIFACTORY_USERNAME: ${ARTIFACTORY_USERNAME}
+  #       ARTIFACTORY_TOKEN: ${ARTIFACTORY_TOKEN}
+  #       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+  #       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+  #   volumes:
+  #     - ~/.ssh/swf/swf.crt:/swf.crt:ro
+  #     - ~/.ssh/swf/swf.key:/swf.key:ro
+  #   command: "${ARTIFACTORY_REPO} ${ARTIFACTORY_USERNAME} ${ARTIFACTORY_TOKEN} ${SHORT_ID} ${LOCATION} /swf.crt /swf.key"
+
   netbench-internet:
     container_name: netbench-internet
     restart: on-failure
     env_file:
       - .env
     hostname: netbench.docker
-    build:
-      context: src/netbench
-      args:
-        SHORT_ID: ${SHORT_ID}
-        LOCATION: ${LOCATION}
-        ARTIFACTORY_REPO: ${ARTIFACTORY_REPO}
-        ARTIFACTORY_USERNAME: ${ARTIFACTORY_USERNAME}
-        ARTIFACTORY_TOKEN: ${ARTIFACTORY_TOKEN}
-        AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-        AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+    image: sylvainfano/netbench:latest
     volumes:
       - ~/.ssh/swf/swf.crt:/swf.crt:ro
       - ~/.ssh/swf/swf.key:/swf.key:ro
