@@ -123,3 +123,9 @@ Please be sure to have the following tools available :
     ```bash
     bash run-manually.sh <path/to/swf.crt> <path/to/swf.key> 
     ```
+
+## Resources
+
+- https://curl.se/docs/manpage.html
+- https://software.es.net/iperf/invoking.html#iperf3-manual-page
+- https://www.cloudflare.com/learning/network-layer/what-is-mtr/
